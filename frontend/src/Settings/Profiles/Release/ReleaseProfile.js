@@ -60,7 +60,6 @@ class ReleaseProfile extends Component {
       enabled,
       required,
       ignored,
-      preferred,
       tags,
       indexerId,
       tagList,
@@ -101,24 +100,7 @@ class ReleaseProfile extends Component {
 
         <div>
           {
-            preferred.map((item) => {
-              const isPreferred = item.value >= 0;
-
-              return (
-                <Label
-                  key={item.key}
-                  kind={isPreferred ? kinds.DEFAULT : kinds.WARNING}
-                >
-                  {item.key} {isPreferred && '+'}{item.value}
-                </Label>
-              );
-            })
-          }
-        </div>
-
-        <div>
-          {
-            split(ignored).map((item) => {
+            ignored.map((item) => {
               if (!item) {
                 return null;
               }
@@ -188,7 +170,6 @@ ReleaseProfile.propTypes = {
   enabled: PropTypes.bool.isRequired,
   required: PropTypes.string.isRequired,
   ignored: PropTypes.string.isRequired,
-  preferred: PropTypes.arrayOf(PropTypes.object).isRequired,
   tags: PropTypes.arrayOf(PropTypes.number).isRequired,
   indexerId: PropTypes.number.isRequired,
   tagList: PropTypes.arrayOf(PropTypes.object).isRequired,
@@ -200,7 +181,6 @@ ReleaseProfile.defaultProps = {
   enabled: true,
   required: '',
   ignored: '',
-  preferred: [],
   indexerId: 0
 };
 

@@ -5,7 +5,6 @@ using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Delay;
-using NzbDrone.Core.Profiles.Releases;
 using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
@@ -16,21 +15,18 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
         private readonly IUpgradableSpecification _upgradableSpecification;
         private readonly IDelayProfileService _delayProfileService;
         private readonly IMediaFileService _mediaFileService;
-        private readonly IPreferredWordService _preferredWordServiceCalculator;
         private readonly Logger _logger;
 
         public DelaySpecification(IPendingReleaseService pendingReleaseService,
                                   IUpgradableSpecification qualityUpgradableSpecification,
                                   IDelayProfileService delayProfileService,
                                   IMediaFileService mediaFileService,
-                                  IPreferredWordService preferredWordServiceCalculator,
                                   Logger logger)
         {
             _pendingReleaseService = pendingReleaseService;
             _upgradableSpecification = qualityUpgradableSpecification;
             _delayProfileService = delayProfileService;
             _mediaFileService = mediaFileService;
-            _preferredWordServiceCalculator = preferredWordServiceCalculator;
             _logger = logger;
         }
 

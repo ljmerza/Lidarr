@@ -5,6 +5,7 @@ using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Common.Serializer;
+using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Download.Aggregation;
 using NzbDrone.Core.IndexerSearch.Definitions;
@@ -22,17 +23,20 @@ namespace NzbDrone.Core.DecisionEngine
     public class DownloadDecisionMaker : IMakeDownloadDecision
     {
         private readonly IEnumerable<IDecisionEngineSpecification> _specifications;
+        private readonly ICustomFormatCalculationService _formatCalculator;
         private readonly IParsingService _parsingService;
         private readonly IRemoteAlbumAggregationService _aggregationService;
         private readonly Logger _logger;
 
         public DownloadDecisionMaker(IEnumerable<IDecisionEngineSpecification> specifications,
             IParsingService parsingService,
+            ICustomFormatCalculationService formatService,
             IRemoteAlbumAggregationService aggregationService,
             Logger logger)
         {
             _specifications = specifications;
             _parsingService = parsingService;
+            _formatCalculator = formatService;
             _aggregationService = aggregationService;
             _logger = logger;
         }
@@ -96,6 +100,9 @@ namespace NzbDrone.Core.DecisionEngine
                         if (!parsedAlbumInfo.ArtistName.IsNullOrWhiteSpace())
                         {
                             var remoteAlbum = _parsingService.Map(parsedAlbumInfo, searchCriteria);
+
+                            remoteAlbum.CustomFormats = _formatCalculator.ParseCustomFormat(parsedAlbumInfo);
+                            remoteAlbum.CustomFormatScore = remoteAlbum?.Artist?.QualityProfile?.Value.CalculateCustomFormatScore(remoteAlbum.CustomFormats) ?? 0;
 
                             // try parsing again using the search criteria, in case it parsed but parsed incorrectly
                             if ((remoteAlbum.Artist == null || remoteAlbum.Albums.Empty()) && searchCriteria != null)

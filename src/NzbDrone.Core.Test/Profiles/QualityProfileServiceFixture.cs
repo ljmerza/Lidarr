@@ -13,7 +13,7 @@ namespace NzbDrone.Core.Test.Profiles
 {
     [TestFixture]
 
-    public class ProfileServiceFixture : CoreTest<QualityProfileService>
+    public class QualityProfileServiceFixture : CoreTest<QualityProfileService>
     {
         [Test]
         public void init_should_add_default_profiles()

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using NUnit.Framework;
+using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
@@ -11,8 +12,6 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
     [TestFixture]
     public class CutoffSpecificationFixture : CoreTest<UpgradableSpecification>
     {
-        private static readonly int NoPreferredWordScore = 0;
-
         [Test]
         public void should_return_true_if_current_album_is_less_than_cutoff()
         {
@@ -23,7 +22,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                  Items = Qualities.QualityFixture.GetDefaultQualities()
              },
              new List<QualityModel> { new QualityModel(Quality.MP3_192, new Revision(version: 2)) },
-             NoPreferredWordScore).Should().BeTrue();
+             new List<CustomFormat>()).Should().BeTrue();
         }
 
         [Test]
@@ -36,7 +35,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 Items = Qualities.QualityFixture.GetDefaultQualities()
             },
             new List<QualityModel> { new QualityModel(Quality.MP3_256, new Revision(version: 2)) },
-            NoPreferredWordScore).Should().BeFalse();
+            new List<CustomFormat>()).Should().BeFalse();
         }
 
         [Test]
@@ -49,7 +48,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 Items = Qualities.QualityFixture.GetDefaultQualities()
             },
             new List<QualityModel> { new QualityModel(Quality.MP3_320, new Revision(version: 2)) },
-            NoPreferredWordScore).Should().BeFalse();
+            new List<CustomFormat>()).Should().BeFalse();
         }
 
         [Test]
@@ -62,7 +61,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 Items = Qualities.QualityFixture.GetDefaultQualities()
             },
             new List<QualityModel> { new QualityModel(Quality.MP3_320, new Revision(version: 1)) },
-            NoPreferredWordScore,
+            new List<CustomFormat>(),
             new QualityModel(Quality.MP3_320, new Revision(version: 2))).Should().BeTrue();
         }
 
@@ -76,7 +75,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 Items = Qualities.QualityFixture.GetDefaultQualities()
             },
             new List<QualityModel> { new QualityModel(Quality.MP3_320, new Revision(version: 2)) },
-            NoPreferredWordScore,
+            new List<CustomFormat>(),
             new QualityModel(Quality.FLAC, new Revision(version: 2))).Should().BeFalse();
         }
 
@@ -92,9 +91,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             Subject.CutoffNotMet(
                 profile,
                 new List<QualityModel> { new QualityModel(Quality.MP3_320, new Revision(version: 2)) },
-                NoPreferredWordScore,
-                new QualityModel(Quality.FLAC, new Revision(version: 2)),
-                10).Should().BeTrue();
+                new List<CustomFormat>(),
+                new QualityModel(Quality.FLAC, new Revision(version: 2))).Should().BeTrue();
         }
 
         [Test]
@@ -109,9 +107,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             Subject.CutoffNotMet(
                 profile,
                 new List<QualityModel> { new QualityModel(Quality.FLAC, new Revision(version: 1)) },
-                NoPreferredWordScore,
-                new QualityModel(Quality.FLAC, new Revision(version: 2)),
-                NoPreferredWordScore).Should().BeTrue();
+                new List<CustomFormat>(),
+                new QualityModel(Quality.FLAC, new Revision(version: 2))).Should().BeTrue();
         }
     }
 }

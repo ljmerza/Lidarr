@@ -8,6 +8,7 @@ using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.EnsureThat;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Music;
 using NzbDrone.Core.Profiles.Releases;
@@ -17,7 +18,7 @@ namespace NzbDrone.Core.Organizer
 {
     public interface IBuildFileNames
     {
-        string BuildTrackFileName(List<Track> tracks, Artist artist, Album album, TrackFile trackFile, NamingConfig namingConfig = null, List<string> preferredWords = null);
+        string BuildTrackFileName(List<Track> tracks, Artist artist, Album album, TrackFile trackFile, NamingConfig namingConfig = null, List<CustomFormat> customFormats = null);
         string BuildTrackFilePath(Artist artist, string fileName, string extension);
         BasicNamingConfig GetBasicNamingConfig(NamingConfig nameSpec);
         string GetArtistFolder(Artist artist, NamingConfig namingConfig = null);
@@ -27,7 +28,7 @@ namespace NzbDrone.Core.Organizer
     {
         private readonly INamingConfigService _namingConfigService;
         private readonly IQualityDefinitionService _qualityDefinitionService;
-        private readonly IPreferredWordService _preferredWordService;
+        private readonly ICustomFormatService _formatService;
         private readonly ICached<TrackFormat[]> _trackFormatCache;
         private readonly ICached<AbsoluteTrackFormat[]> _absoluteTrackFormatCache;
         private readonly Logger _logger;
@@ -71,18 +72,18 @@ namespace NzbDrone.Core.Organizer
         public FileNameBuilder(INamingConfigService namingConfigService,
                                IQualityDefinitionService qualityDefinitionService,
                                ICacheManager cacheManager,
-                               IPreferredWordService preferredWordService,
+                               ICustomFormatService formatService,
                                Logger logger)
         {
             _namingConfigService = namingConfigService;
             _qualityDefinitionService = qualityDefinitionService;
-            _preferredWordService = preferredWordService;
+            _formatService = formatService;
             _trackFormatCache = cacheManager.GetCache<TrackFormat[]>(GetType(), "trackFormat");
             _absoluteTrackFormatCache = cacheManager.GetCache<AbsoluteTrackFormat[]>(GetType(), "absoluteTrackFormat");
             _logger = logger;
         }
 
-        public string BuildTrackFileName(List<Track> tracks, Artist artist, Album album, TrackFile trackFile, NamingConfig namingConfig = null, List<string> preferredWords = null)
+        public string BuildTrackFileName(List<Track> tracks, Artist artist, Album album, TrackFile trackFile, NamingConfig namingConfig = null, List<CustomFormat> customFormats = null)
         {
             if (namingConfig == null)
             {
@@ -117,7 +118,7 @@ namespace NzbDrone.Core.Organizer
             AddTrackFileTokens(tokenHandlers, trackFile);
             AddQualityTokens(tokenHandlers, artist, trackFile);
             AddMediaInfoTokens(tokenHandlers, trackFile);
-            AddPreferredWords(tokenHandlers, artist, trackFile, preferredWords);
+            AddCustomFormats(tokenHandlers, artist, trackFile, customFormats);
 
             var splitPatterns = pattern.Split(new char[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
             var components = new List<string>();
@@ -360,14 +361,14 @@ namespace NzbDrone.Core.Organizer
             tokenHandlers["{MediaInfo AudioSampleRate}"] = m => MediaInfoFormatter.FormatAudioSampleRate(trackFile.MediaInfo);
         }
 
-        private void AddPreferredWords(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Artist artist, TrackFile trackFile, List<string> preferredWords = null)
+        private void AddCustomFormats(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Artist artist, TrackFile trackFile, List<CustomFormat> customFormats = null)
         {
-            if (preferredWords == null)
+            if (customFormats == null)
             {
-                preferredWords = _preferredWordService.GetMatchingPreferredWords(artist, trackFile.GetSceneOrFileName());
+                customFormats = CustomFormatCalculationService.ParseCustomFormat(trackFile, _formatService.All());
             }
 
-            tokenHandlers["{Preferred Words}"] = m => string.Join(" ", preferredWords);
+            tokenHandlers["{Custom Formats}"] = m => string.Join(" ", customFormats.Where(x => x.IncludeCustomFormatWhenRenaming));
         }
 
         private string ReplaceTokens(string pattern, Dictionary<string, Func<TokenMatch, string>> tokenHandlers, NamingConfig namingConfig)
