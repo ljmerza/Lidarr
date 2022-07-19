@@ -162,6 +162,10 @@ const links = [
         to: '/system/updates'
       },
       {
+        title: translate('Plugins'),
+        to: '/system/plugins'
+      },
+      {
         title: translate('Events'),
         to: '/system/events'
       },
