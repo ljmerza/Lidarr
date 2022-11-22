@@ -13,9 +13,9 @@ namespace NzbDrone.Core.Datastore.Migration
 
             Alter.Table(table).AlterColumn("Protocol").AsString().Nullable();
 
-            Execute.Sql($"DELETE FROM \"{table}\" WHERE \"Protocol\" = 0");
-            Execute.Sql($"UPDATE \"{table}\" SET \"Protocol\" = 'UsenetDownloadProtocol' WHERE \"Protocol\" = 1");
-            Execute.Sql($"UPDATE \"{table}\" SET \"Protocol\" = 'TorrentDownloadProtocol' WHERE \"Protocol\" = 2");
+            Execute.Sql($"DELETE FROM \"{table}\" WHERE \"Protocol\" = '0'");
+            Execute.Sql($"UPDATE \"{table}\" SET \"Protocol\" = 'UsenetDownloadProtocol' WHERE \"Protocol\" = '1'");
+            Execute.Sql($"UPDATE \"{table}\" SET \"Protocol\" = 'TorrentDownloadProtocol' WHERE \"Protocol\" = '2'");
         }
     }
 }
